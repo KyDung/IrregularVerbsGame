@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+import { SupportAdButton } from './components/layout/SupportAdButton';
 import { HomePage } from './pages/HomePage';
 import { LevelsPage } from './pages/LevelsPage';
 import { LevelGamesPage } from './pages/LevelGamesPage';
@@ -200,6 +201,7 @@ export const App: React.FC = () => {
         {renderContent()}
       </main>
       <Footer />
+      <SupportAdButton />
     </div>
   );
 };
