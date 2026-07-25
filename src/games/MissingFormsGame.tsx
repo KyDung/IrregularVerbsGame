@@ -38,6 +38,8 @@ export const MissingFormsGame: React.FC<MissingFormsGameProps> = ({
   const [answers, setAnswers] = useState<AnswerResult[]>([]);
   const [score, setScore] = useState(0);
 
+  const verbsKey = verbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const modes: Mode[] = ['v1_missing_v2v3', 'v2_missing_v1v3', 'v3_missing_v1v2', 'v1v2_missing_v3'];
     const shuffledVerbs = shuffleArray([...verbs]).slice(0, Math.min(questionCount, verbs.length));
@@ -96,7 +98,7 @@ export const MissingFormsGame: React.FC<MissingFormsGameProps> = ({
     });
 
     setQuestions(generated);
-  }, [verbs, questionCount]);
+  }, [verbsKey, questionCount]);
 
   const currentQ = questions[currentIndex];
   if (!currentQ) return <div className="p-8 text-center font-bold text-slate-500">Đang khởi tạo game...</div>;

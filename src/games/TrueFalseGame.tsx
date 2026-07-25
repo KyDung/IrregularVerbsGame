@@ -30,6 +30,9 @@ export const TrueFalseGame: React.FC<TrueFalseGameProps> = ({
   const [answers, setAnswers] = useState<AnswerResult[]>([]);
   const [score, setScore] = useState(0);
 
+  const verbsKey = verbs.map(v => v.id).join(',');
+  const allVerbsKey = allVerbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const selectedVerbs = shuffleArray([...verbs]).slice(0, Math.min(questionCount, verbs.length));
     const generated: TrueFalseQuestion[] = [];
@@ -83,7 +86,7 @@ export const TrueFalseGame: React.FC<TrueFalseGameProps> = ({
     });
 
     setQuestions(generated);
-  }, [verbs, allVerbs, questionCount]);
+  }, [verbsKey, allVerbsKey, questionCount]);
 
   const currentQ = questions[currentIndex];
   if (!currentQ) return <div className="p-8 text-center font-bold text-slate-500">Khởi tạo game Đúng / Sai...</div>;

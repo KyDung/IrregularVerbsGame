@@ -1,6 +1,5 @@
-import { UserProgress, MistakeRecord, UserSettings, VerbMastery, LevelStats } from '../types/progress';
+import { UserProgress, MistakeRecord, UserSettings, LevelStats } from '../types/progress';
 import { calculateVerbMastery } from '../utils/masteryCalculator';
-import { LEVELS } from '../data/levelsData';
 
 const STORAGE_KEY = 'irregular_verbs_360_user_progress_v1';
 const CURRENT_VERSION = 1;
@@ -99,11 +98,11 @@ class ProgressService {
 
     // Ensure array integrity
     const unlockedLevels = Array.isArray(data.unlockedLevels) && data.unlockedLevels.length > 0
-      ? Array.from(new Set([...data.unlockedLevels, ...ALL_LEVEL_IDS]))
+      ? Array.from(new Set([...data.unlockedLevels as number[], ...ALL_LEVEL_IDS]))
       : ALL_LEVEL_IDS;
 
     const completedLevels = Array.isArray(data.completedLevels)
-      ? Array.from(new Set(data.completedLevels))
+      ? Array.from(new Set(data.completedLevels as number[]))
       : [];
 
     return {
@@ -125,7 +124,7 @@ class ProgressService {
     gameType: string,
     isCorrect: boolean,
     userAnswer: string | string[],
-    correctAnswers: string[],
+    _correctAnswers: string[],
     responseTime: number
   ): UserProgress {
     const progress = this.getProgress();
@@ -162,16 +161,18 @@ class ProgressService {
         progress.mistakes.push(newRecord);
       }
     } else {
-      // Update mistake recovery count if previously missed
-      progress.mistakes = progress.mistakes.map(m => {
-        if (m.verbId === verbId) {
-          return {
-            ...m,
-            correctCountAfterMistake: m.correctCountAfterMistake + 1,
-          };
-        }
-        return m;
-      });
+      // Update mistake recovery count if previously missed & remove if correctly answered 3 times
+      progress.mistakes = progress.mistakes
+        .map(m => {
+          if (m.verbId === verbId) {
+            return {
+              ...m,
+              correctCountAfterMistake: m.correctCountAfterMistake + 1,
+            };
+          }
+          return m;
+        })
+        .filter(m => m.correctCountAfterMistake < 3);
     }
 
     this.saveProgress(progress);

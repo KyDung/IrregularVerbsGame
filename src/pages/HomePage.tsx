@@ -6,7 +6,6 @@ import {
   BookOpen, 
   Award, 
   BookmarkCheck, 
-  Flame, 
   Play, 
   Layers, 
   ChevronRight, 

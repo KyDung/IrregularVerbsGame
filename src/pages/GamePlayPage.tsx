@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { IrregularVerb } from '../types/verb';
 import { GameType, AnswerResult } from '../types/game';
@@ -14,7 +14,7 @@ import { MistakeReviewGame } from '../games/MistakeReviewGame';
 import { MixedChallengeGame } from '../games/MixedChallengeGame';
 import { useProgress } from '../hooks/useProgress';
 import { Modal } from '../components/layout/Modal';
-import { Trophy, CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen, Layers } from 'lucide-react';
+import { Trophy, CheckCircle2, RotateCcw, ArrowRight, BookOpen } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface GamePlayPageProps {
@@ -35,11 +35,17 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
   const [sessionScore, setSessionScore] = useState(0);
   const [sessionAccuracy, setSessionAccuracy] = useState(0);
   const [unlockedNextLevel, setUnlockedNextLevel] = useState(false);
+  const [overrideVerbs, setOverrideVerbs] = useState<IrregularVerb[] | null>(null);
 
-  // Filter level verbs if levelId is provided
-  const levelVerbs = levelId
-    ? allVerbs.filter(v => v.level === levelId)
-    : allVerbs.slice(0, 20);
+  // Filter level verbs if levelId is provided, stably memoized
+  const levelVerbs = useMemo(() => {
+    if (overrideVerbs && overrideVerbs.length > 0) {
+      return overrideVerbs;
+    }
+    return levelId
+      ? allVerbs.filter(v => v.level === levelId)
+      : allVerbs.slice(0, 20);
+  }, [levelId, allVerbs, overrideVerbs]);
 
   const levelInfo = levelId ? getLevelById(levelId) : undefined;
 
@@ -87,12 +93,25 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
   };
 
   const handleReplay = () => {
+    setOverrideVerbs(null);
     setSessionResults(null);
     setSessionScore(0);
     setSessionAccuracy(0);
   };
 
   const currentMistakesInSession = sessionResults?.filter(r => !r.isCorrect) || [];
+
+  const handleReviewSessionMistakes = () => {
+    if (!sessionResults) return;
+    const wrongIds = new Set(currentMistakesInSession.map(r => r.verbId));
+    const wrongVerbs = allVerbs.filter(v => wrongIds.has(v.id));
+    if (wrongVerbs.length > 0) {
+      setOverrideVerbs(wrongVerbs);
+      setSessionResults(null);
+      setSessionScore(0);
+      setSessionAccuracy(0);
+    }
+  };
 
   return (
     <div className="py-6">
@@ -103,6 +122,7 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
             <QuizGame
               verbs={levelVerbs}
               allVerbs={allVerbs}
+              questionCount={levelVerbs.length}
               mistakeHistory={progress.mistakes}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
@@ -113,6 +133,7 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
           {gameType === 'input' && (
             <InputGame
               verbs={levelVerbs}
+              questionCount={levelVerbs.length}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
               onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
@@ -122,6 +143,7 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
           {gameType === 'missing' && (
             <MissingFormsGame
               verbs={levelVerbs}
+              questionCount={levelVerbs.length}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
               onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
@@ -131,6 +153,7 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
           {gameType === 'matching' && (
             <MatchingGame
               verbs={levelVerbs}
+              pairCount={Math.min(8, levelVerbs.length)}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
               onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
@@ -141,6 +164,17 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
             <TrueFalseGame
               verbs={levelVerbs}
               allVerbs={allVerbs}
+              questionCount={levelVerbs.length}
+              soundEnabled={progress.settings.soundEnabled}
+              onCompleteSession={handleCompleteSession}
+              onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
+            />
+          )}
+
+          {gameType === 'odd_one_out' && (
+            <OddOneOutGame
+              allVerbs={allVerbs}
+              questionCount={levelVerbs.length}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
               onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
@@ -150,6 +184,7 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
           {gameType === 'reorder' && (
             <ReorderGame
               verbs={levelVerbs}
+              questionCount={levelVerbs.length}
               soundEnabled={progress.settings.soundEnabled}
               onCompleteSession={handleCompleteSession}
               onExit={() => onNavigate(levelId ? `/level/${levelId}/games` : '/levels')}
@@ -191,7 +226,11 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
                 {sessionAccuracy >= 70 ? '🎉 Xuất sắc! Hoàn thành lượt chơi' : 'Cố gắng lên!'}
               </h3>
               <p className="text-xs font-bold text-slate-500">
-                {levelInfo ? levelInfo.title : 'Thử thách tự do'}
+                {overrideVerbs
+                  ? `Ôn lại ${overrideVerbs.length} câu sai vừa chơi`
+                  : levelInfo
+                  ? levelInfo.title
+                  : 'Thử thách tự do'}
               </p>
             </div>
 
@@ -228,12 +267,12 @@ export const GamePlayPage: React.FC<GamePlayPageProps> = ({
                   onClick={handleReplay}
                   className="py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-sm flex items-center justify-center gap-1.5"
                 >
-                  <RotateCcw className="w-4 h-4" /> Chơi lại
+                  <RotateCcw className="w-4 h-4" /> Chơi lại màn
                 </button>
 
                 {currentMistakesInSession.length > 0 && (
                   <button
-                    onClick={() => onNavigate('/review')}
+                    onClick={handleReviewSessionMistakes}
                     className="py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20"
                   >
                     <BookOpen className="w-4 h-4" /> Ôn câu sai ({currentMistakesInSession.length})

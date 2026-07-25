@@ -4,9 +4,8 @@ import { QuizGame } from './QuizGame';
 import { InputGame } from './InputGame';
 import { TrueFalseGame } from './TrueFalseGame';
 import { ReorderGame } from './ReorderGame';
-import { MatchingGame } from './MatchingGame';
 import { AnswerResult } from '../types/game';
-import { Zap, Clock, Trophy } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface MixedChallengeGameProps {
   verbs: IrregularVerb[];

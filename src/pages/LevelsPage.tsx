@@ -4,7 +4,7 @@ import { LEVELS, getLevelById } from '../data/levelsData';
 import { IRREGULAR_VERBS } from '../data/verbsData';
 import { Modal } from '../components/layout/Modal';
 import { formatAnswersDisplay } from '../utils/answerNormalizer';
-import { Lock, Star, Play, BookOpen, ChevronRight, CheckCircle2, Eye, Volume2 } from 'lucide-react';
+import { Play, BookOpen, CheckCircle2, Eye, Volume2 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface LevelsPageProps {
@@ -12,7 +12,7 @@ interface LevelsPageProps {
 }
 
 export const LevelsPage: React.FC<LevelsPageProps> = ({ onNavigate }) => {
-  const { progress, isLevelUnlocked, updateLevelSessionResult } = useProgress();
+  const { progress, updateLevelSessionResult } = useProgress();
   const [previewLevelId, setPreviewLevelId] = useState<number | null>(null);
 
   const previewLevel = previewLevelId ? getLevelById(previewLevelId) : null;
@@ -46,7 +46,6 @@ export const LevelsPage: React.FC<LevelsPageProps> = ({ onNavigate }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {LEVELS.map(level => {
-          const unlocked = isLevelUnlocked(level.id);
           const stats = progress.levelStats[level.id];
           const isCompleted = stats?.completed || false;
           const accuracy = stats?.bestAccuracy || 0;

@@ -7,7 +7,6 @@ import {
   Moon, 
   Volume2, 
   VolumeX, 
-  Unlock, 
   RotateCcw, 
   Download, 
   Upload, 

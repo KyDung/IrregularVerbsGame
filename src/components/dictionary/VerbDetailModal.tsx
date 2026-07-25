@@ -3,7 +3,7 @@ import { IrregularVerb } from '../../types/verb';
 import { VerbMastery } from '../../types/progress';
 import { Modal } from '../layout/Modal';
 import { formatAnswersDisplay } from '../../utils/answerNormalizer';
-import { Volume2, Award, Info, Globe, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Volume2, Award, Info, Globe, CheckCircle2, XCircle } from 'lucide-react';
 import { soundEffects } from '../../utils/soundEffects';
 
 interface VerbDetailModalProps {

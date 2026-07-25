@@ -3,7 +3,7 @@ import { IrregularVerb } from '../types/verb';
 import { AnswerResult } from '../types/game';
 import { formatAnswersDisplay } from '../utils/answerNormalizer';
 import { shuffleArray } from '../utils/distractorGenerator';
-import { CheckCircle2, RotateCcw, Award } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface MatchingGameProps {
@@ -39,6 +39,8 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({
   const [startTime] = useState(Date.now());
   const [score, setScore] = useState(0);
 
+  const verbsKey = verbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const selectedVerbs = shuffleArray([...verbs]).slice(0, Math.min(pairCount, verbs.length));
 
@@ -60,7 +62,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({
 
     setLeftItems(shuffleArray(lefts));
     setRightItems(shuffleArray(rights));
-  }, [verbs, pairCount]);
+  }, [verbsKey, pairCount]);
 
   const handleSelectLeft = (id: string) => {
     const item = leftItems.find(i => i.id === id);

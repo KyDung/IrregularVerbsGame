@@ -1,7 +1,7 @@
 import React from 'react';
 import { useProgress } from '../hooks/useProgress';
 import { IRREGULAR_VERBS } from '../data/verbsData';
-import { BookmarkCheck, Play, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { BookmarkCheck, Play, CheckCircle2 } from 'lucide-react';
 import { formatAnswersDisplay } from '../utils/answerNormalizer';
 
 interface ReviewPageProps {

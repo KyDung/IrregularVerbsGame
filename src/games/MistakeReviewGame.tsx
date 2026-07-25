@@ -3,12 +3,17 @@ import { IrregularVerb } from '../types/verb';
 import { MistakeRecord } from '../types/progress';
 import { QuizGame } from './QuizGame';
 import { InputGame } from './InputGame';
-import { AnswerResult } from '../types/game';
+import { MissingFormsGame } from './MissingFormsGame';
+import { MatchingGame } from './MatchingGame';
+import { TrueFalseGame } from './TrueFalseGame';
+import { ReorderGame } from './ReorderGame';
+import { AnswerResult, GameType } from '../types/game';
 import { BookmarkCheck, AlertCircle } from 'lucide-react';
 
 interface MistakeReviewGameProps {
   allVerbs: IrregularVerb[];
   mistakes: MistakeRecord[];
+  initialGameMode?: GameType;
   soundEnabled?: boolean;
   onCompleteSession: (results: AnswerResult[], score: number, accuracyPercent: number) => void;
   onExit: () => void;
@@ -17,12 +22,16 @@ interface MistakeReviewGameProps {
 export const MistakeReviewGame: React.FC<MistakeReviewGameProps> = ({
   allVerbs,
   mistakes,
+  initialGameMode = 'quiz',
   soundEnabled = true,
   onCompleteSession,
   onExit,
 }) => {
   const [reviewVerbs, setReviewVerbs] = useState<IrregularVerb[]>([]);
-  const [gameMode, setGameMode] = useState<'quiz' | 'input'>('quiz');
+  const [gameMode, setGameMode] = useState<GameType>(initialGameMode);
+
+  const mistakesKey = mistakes.map(m => `${m.verbId}_${m.wrongCount}`).join(',');
+  const allVerbsKey = allVerbs.map(v => v.id).join(',');
 
   useEffect(() => {
     if (!mistakes || mistakes.length === 0) return;
@@ -39,7 +48,7 @@ export const MistakeReviewGame: React.FC<MistakeReviewGameProps> = ({
     const filteredVerbs = allVerbs.filter(v => targetIds.includes(v.id));
 
     setReviewVerbs(filteredVerbs);
-  }, [allVerbs, mistakes]);
+  }, [allVerbsKey, mistakesKey]);
 
   if (mistakes.length === 0 || reviewVerbs.length === 0) {
     return (
@@ -63,36 +72,40 @@ export const MistakeReviewGame: React.FC<MistakeReviewGameProps> = ({
     );
   }
 
+  const modes: { id: GameType; label: string }[] = [
+    { id: 'quiz', label: 'Quiz' },
+    { id: 'input', label: 'Nhập V2-V3' },
+    { id: 'missing', label: 'Điền dạng thiếu' },
+    { id: 'matching', label: 'Nối từ' },
+    { id: 'true_false', label: 'Đúng / Sai' },
+    { id: 'reorder', label: 'Sắp xếp' },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Mode selection banner */}
-      <div className="max-w-2xl mx-auto px-4 pt-2 flex items-center justify-between">
+      <div className="max-w-3xl mx-auto px-4 pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
           <AlertCircle className="w-4 h-4" />
           <span>Đang ôn tập {reviewVerbs.length} từ trong Sổ từ sai</span>
         </div>
 
-        <div className="p-1 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center gap-1">
-          <button
-            onClick={() => setGameMode('quiz')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-              gameMode === 'quiz' ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            Dạng Quiz
-          </button>
-          <button
-            onClick={() => setGameMode('input')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-              gameMode === 'input' ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            Dạng Nhập
-          </button>
+        <div className="p-1 rounded-xl bg-slate-200 dark:bg-slate-800 flex flex-wrap items-center gap-1">
+          {modes.map(m => (
+            <button
+              key={m.id}
+              onClick={() => setGameMode(m.id)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                gameMode === m.id ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {gameMode === 'quiz' ? (
+      {gameMode === 'quiz' && (
         <QuizGame
           verbs={reviewVerbs}
           allVerbs={allVerbs}
@@ -101,8 +114,51 @@ export const MistakeReviewGame: React.FC<MistakeReviewGameProps> = ({
           onCompleteSession={onCompleteSession}
           onExit={onExit}
         />
-      ) : (
+      )}
+
+      {gameMode === 'input' && (
         <InputGame
+          verbs={reviewVerbs}
+          questionCount={reviewVerbs.length}
+          soundEnabled={soundEnabled}
+          onCompleteSession={onCompleteSession}
+          onExit={onExit}
+        />
+      )}
+
+      {gameMode === 'missing' && (
+        <MissingFormsGame
+          verbs={reviewVerbs}
+          questionCount={reviewVerbs.length}
+          soundEnabled={soundEnabled}
+          onCompleteSession={onCompleteSession}
+          onExit={onExit}
+        />
+      )}
+
+      {gameMode === 'matching' && (
+        <MatchingGame
+          verbs={reviewVerbs}
+          pairCount={Math.min(8, reviewVerbs.length)}
+          soundEnabled={soundEnabled}
+          onCompleteSession={onCompleteSession}
+          onExit={onExit}
+        />
+      )}
+
+      {gameMode === 'true_false' && (
+        <TrueFalseGame
+          verbs={reviewVerbs}
+          allVerbs={allVerbs}
+          questionCount={reviewVerbs.length}
+          soundEnabled={soundEnabled}
+          onCompleteSession={onCompleteSession}
+          onExit={onExit}
+        />
+      )}
+
+      {gameMode === 'reorder' && (
+        <ReorderGame
           verbs={reviewVerbs}
           questionCount={reviewVerbs.length}
           soundEnabled={soundEnabled}

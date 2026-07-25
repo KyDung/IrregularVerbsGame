@@ -1,8 +1,7 @@
 import React from 'react';
 import { useProgress } from '../hooks/useProgress';
 import { IRREGULAR_VERBS } from '../data/verbsData';
-import { LEVELS } from '../data/levelsData';
-import { BarChart3, Award, Flame, BookOpen, CheckCircle2, BookmarkCheck, TrendingUp } from 'lucide-react';
+import { BarChart3, Award, Flame, BookOpen, BookmarkCheck, TrendingUp } from 'lucide-react';
 import { formatAnswersDisplay } from '../utils/answerNormalizer';
 
 export const StatisticsPage: React.FC = () => {

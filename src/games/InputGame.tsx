@@ -34,11 +34,13 @@ export const InputGame: React.FC<InputGameProps> = ({
 
   const v2InputRef = useRef<HTMLInputElement>(null);
 
+  const verbsKey = verbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const shuffled = shuffleArray([...verbs]).slice(0, Math.min(questionCount, verbs.length));
     setTargetVerbs(shuffled);
     setQuestionStartTime(Date.now());
-  }, [verbs, questionCount]);
+  }, [verbsKey, questionCount]);
 
   useEffect(() => {
     if (!isAnswered && v2InputRef.current) {

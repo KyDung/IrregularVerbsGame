@@ -4,7 +4,7 @@ import { IrregularVerb } from '../types/verb';
 import { useProgress } from '../hooks/useProgress';
 import { VerbCard } from '../components/dictionary/VerbCard';
 import { VerbDetailModal } from '../components/dictionary/VerbDetailModal';
-import { Search, Filter, Volume2, BookOpen } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 export const DictionaryPage: React.FC = () => {

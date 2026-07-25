@@ -3,7 +3,7 @@ import { IrregularVerb, PatternGroup } from '../types/verb';
 import { OddOneOutQuestion, AnswerResult } from '../types/game';
 import { formatAnswersDisplay } from '../utils/answerNormalizer';
 import { shuffleArray } from '../utils/distractorGenerator';
-import { CheckCircle2, XCircle, ArrowRight, HelpCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface OddOneOutGameProps {
@@ -38,6 +38,8 @@ export const OddOneOutGame: React.FC<OddOneOutGameProps> = ({
   const [answers, setAnswers] = useState<AnswerResult[]>([]);
   const [score, setScore] = useState(0);
 
+  const allVerbsKey = allVerbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const patternGroups: PatternGroup[] = ['v1=v2=v3', 'v2=v3', 'en_suffix', 'vowel_change'];
     const generated: OddOneOutQuestion[] = [];
@@ -63,7 +65,7 @@ export const OddOneOutGame: React.FC<OddOneOutGameProps> = ({
     });
 
     setQuestions(shuffleArray(generated).slice(0, questionCount));
-  }, [allVerbs, questionCount]);
+  }, [allVerbsKey, questionCount]);
 
   const currentQ = questions[currentIndex];
   if (!currentQ) return <div className="p-8 text-center font-bold text-slate-500">Khởi tạo game Tìm từ khác nhóm...</div>;

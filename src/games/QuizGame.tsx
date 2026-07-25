@@ -38,8 +38,10 @@ export const QuizGame: React.FC<QuizGameProps> = ({
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(timeLimit);
 
-  // Generate questions batch stably ONCE on mount
-  // EVERY question in Quiz directly practices both V2 and V3 forms!
+  const verbsKey = verbs.map(v => v.id).join(',');
+  const allVerbsKey = allVerbs.map(v => v.id).join(',');
+
+  // Generate questions batch stably ONCE on mount or when verbs change
   useEffect(() => {
     const generated: QuizQuestion[] = [];
     const shuffledVerbs = shuffleArray([...verbs]).slice(0, Math.min(questionCount, verbs.length));
@@ -80,7 +82,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({
     setQuestions(generated);
     setQuestionStartTime(Date.now());
     if (timeLimit > 0) setTimeLeft(timeLimit);
-  }, [verbs, allVerbs, questionCount, mistakeHistory, timeLimit]);
+  }, [verbsKey, allVerbsKey, questionCount, timeLimit]);
 
   // Timer countdown if enabled
   useEffect(() => {

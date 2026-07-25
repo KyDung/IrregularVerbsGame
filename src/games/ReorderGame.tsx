@@ -34,6 +34,8 @@ export const ReorderGame: React.FC<ReorderGameProps> = ({
   const [answers, setAnswers] = useState<AnswerResult[]>([]);
   const [score, setScore] = useState(0);
 
+  const verbsKey = verbs.map(v => v.id).join(',');
+
   useEffect(() => {
     const selectedVerbs = shuffleArray([...verbs]).slice(0, Math.min(questionCount, verbs.length));
 
@@ -53,7 +55,7 @@ export const ReorderGame: React.FC<ReorderGameProps> = ({
     });
 
     setQuestions(generated);
-  }, [verbs, questionCount]);
+  }, [verbsKey, questionCount]);
 
   useEffect(() => {
     const currentQ = questions[currentIndex];
